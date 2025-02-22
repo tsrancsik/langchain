@@ -9,11 +9,11 @@ from langchain_core.tools import BaseTool
 from langchain_core.tools.base import BaseToolkit
 from pydantic import ConfigDict, Field
 
-from langchain_community.tools.sql_database.tool import (
-    InfoSQLDatabaseTool,
-    ListSQLDatabaseTool,
-    QuerySQLCheckerTool,
-    QuerySQLDatabaseTool,
+from langchain_community.tools.ravendb.tool import (
+    InfoRavenDBTool,
+    ListRavenDBTool,
+    QueryRQLCheckerTool,
+    QueryRavenDBTool,
 )
 from langchain_community.tools.ravendb.tool import (
     QueryRavenDBTool as QueryRavenDBBaseTool,  # keep import for backwards compat.
@@ -21,8 +21,9 @@ from langchain_community.tools.ravendb.tool import (
 from langchain_community.utilities.ravendb import RavenDB
 
 
+# TODO: Add RavenDB prompt to the prompt hub
 class RavenDBToolkit(BaseToolkit):
-    """SQLDatabaseToolkit for interacting with SQL databases.
+    """RavenDBToolkit for interacting with RavenDB databases.
 
     Setup:
         Install ``langchain-community``.
@@ -32,16 +33,16 @@ class RavenDBToolkit(BaseToolkit):
             pip install -U langchain-community
 
     Key init args:
-        db: SQLDatabase
-            The SQL database.
+        db: RavenDB
+            The RavenDB database.
         llm: BaseLanguageModel
-            The language model (for use with QuerySQLCheckerTool)
+            The language model (for use with QueryRQLCheckerTool)
 
     Instantiate:
         .. code-block:: python
 
-            from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
-            from langchain_community.utilities.sql_database import SQLDatabase
+            from langchain_community.agent_toolkits.ravendb.toolkit import RavenDBToolkit
+            from langchain_community.utilities.ravendb import RavenDB
             from langchain_openai import ChatOpenAI
 
             db = RavenDB(
@@ -67,7 +68,7 @@ class RavenDBToolkit(BaseToolkit):
 
             # Pull prompt (or define your own)
             prompt_template = hub.pull("langchain-ai/sql-agent-system-prompt")
-            system_message = prompt_template.format(dialect="SQLite", top_k=5)
+            system_message = prompt_template.format(top_k=5)
 
             # Create agent
             agent_executor = create_react_agent(
@@ -83,7 +84,7 @@ class RavenDBToolkit(BaseToolkit):
             )
             for event in events:
                 event["messages"][-1].pretty_print()
-    """  # noqa: E501
+    """
 
     db: RavenDB = Field(exclude=True)
     llm: BaseLanguageModel = Field(exclude=True)
@@ -102,7 +103,7 @@ class RavenDBToolkit(BaseToolkit):
             f"{list_ravendb_tool.name} first! "
             "Example Input: collection1, collection2, collection3"
         )
-        info_sql_database_tool = InfoSQLDatabaseTool(
+        info_ravendb_tool = InfoRavenDBTool(
             db=self.db, description=info_ravendb_tool_description
         )
         query_ravendb_tool_description = (
@@ -113,7 +114,7 @@ class RavenDBToolkit(BaseToolkit):
             f"'xxxx' in 'field list', use {info_ravendb_tool.name} "
             "to query the correct table fields."
         )
-        query_sql_database_tool = QuerySQLDatabaseTool(
+        query_ravendb_tool = QueryRavenDBTool(
             db=self.db, description=query_ravendb_tool_description
         )
         query_rql_checker_tool_description = (
