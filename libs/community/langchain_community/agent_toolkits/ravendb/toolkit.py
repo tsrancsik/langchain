@@ -114,7 +114,7 @@ class RavenDBToolkit(BaseToolkit):
             "to query the correct table fields."
         )
         query_sql_database_tool = QuerySQLDatabaseTool(
-            db=self.db, description=query_sql_database_tool_description
+            db=self.db, description=query_ravendb_tool_description
         )
         query_rql_checker_tool_description = (
             "Use this tool to double check if your query is correct before executing "
