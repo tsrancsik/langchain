@@ -34,7 +34,7 @@ class _QueryRavenDBToolInput(BaseModel):
 class QueryRavenDBTool(BaseRavenDBTool, BaseTool):  # type: ignore[override, override]
     name: str = "ravendb_query"
     description: str = """
-    Execute an RQL query against the database and get back the result..
+    Execute an RQL query against the RavenDB database and get back the result..
     If the query is not correct, an error message will be returned.
     If an error is returned, rewrite the query, check the query, and try again.
     """

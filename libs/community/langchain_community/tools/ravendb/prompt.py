@@ -1,6 +1,6 @@
 QUERY_CHECKER = """
 {query}
-Double check the RavenDB query above for common mistakes, including:
+Double check the RavenDB RQL query above for common mistakes, including:
 - Data type mismatch in predicates
 - Properly quoting identifiers
 - Using the correct number of arguments for functions
