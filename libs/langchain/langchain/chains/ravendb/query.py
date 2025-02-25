@@ -32,7 +32,7 @@ class RQLInputWithCollections(TypedDict):
 
 def create_rql_query_chain(
     llm: BaseLanguageModel,
-    db: SQLDatabase,
+    db: RavenDB,
     prompt: Optional[BasePromptTemplate] = None,
     k: int = 5,
 ) -> Runnable[Union[RQLInput, RQLInputWithCollections, Dict[str, Any]], str]:
@@ -40,7 +40,7 @@ def create_rql_query_chain(
 
     *Security Note*: This chain generates RavenDB RQL queries for the given database.
 
-        The SQLDatabase class provides a get_collection_info method that can be used
+        The RavenDB class provides a get_collection_info method that can be used
         to get column information as well as sample data from the table.
 
         To mitigate risk of leaking sensitive data, limit permissions
@@ -61,7 +61,7 @@ def create_rql_query_chain(
         k: The number of results per select statement to return. Defaults to 5.
 
     Returns:
-        A chain that takes in a question and generates a SQL query that answers
+        A chain that takes in a question and generates a RavenDB RQL query that answers
         that question.
 
     Example:
@@ -71,15 +71,20 @@ def create_rql_query_chain(
             # pip install -U langchain langchain-community langchain-openai
             from langchain_openai import ChatOpenAI
             from langchain.chains import create_rql_query_chain
-            from langchain_community.utilities import SQLDatabase
+            from langchain_community.utilities import RavenDB
 
-            db = SQLDatabase.from_uri("sqlite:///Chinook.db")
-            llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
-            chain = create_rql_query_chain(llm, db)
+            ravendb = RavenDB(
+                url="https://your-ravendb-url",
+                database_name="your-database-name",
+                cert_path="/path/to/your/certificate",  # Add the path to your certificate here
+                api_key="YOUR_API_KEY"
+            )
+            llm = ChatOpenAI(model="gpt-4o", temperature=0)
+            chain = create_rql_query_chain(llm, ravendb)
             response = chain.invoke({"question": "How many employees are there"})
 
     Prompt:
-        If no prompt is provided, a default prompt is selected based on the SQLDatabase dialect. If one is provided, it must support input variables:
+        If no prompt is provided, a default prompt is selected based on the RavenDB dialect. If one is provided, it must support input variables:
             * input: The user question plus suffix "\nRQLQuery: " is passed here.
             * top_k: The number of results per select statement (the `k` argument to
                 this function) is passed in here.
