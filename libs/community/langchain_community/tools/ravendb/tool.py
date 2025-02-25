@@ -31,7 +31,7 @@ class _QueryRavenDBToolInput(BaseModel):
     query: str = Field(..., description="A detailed and correct RQL query.")
 
 
-class QueryRavenDBTool(BaseRavenDBTool, BaseTool):  # type: ignore[override, override]
+class QueryRavenDBTool(BaseRavenDBTool, BaseTool):
     name: str = "ravendb_query"
     description: str = """
     Execute an RQL query against the RavenDB database and get back the result..
@@ -44,7 +44,7 @@ class QueryRavenDBTool(BaseRavenDBTool, BaseTool):  # type: ignore[override, ove
         self,
         query: str,
         run_manager: Optional[CallbackManagerForToolRun] = None,
-    ) -> Union[str, Sequence[Dict[str, Any]], Result]:
+    ) -> str:
         """Execute the query, return the results or an error message."""
         return self.db.run_no_throw(query)
 
@@ -59,7 +59,7 @@ class _InfoRavenDBToolInput(BaseModel):
     )
 
 
-class InfoRavenDBTool(BaseRavenDBTool, BaseTool):  # type: ignore[override, override]
+class InfoRavenDBTool(BaseRavenDBTool, BaseTool):
     """Tool for getting metadata about a RavenDB database."""
 
     name: str = "ravendb_schema"

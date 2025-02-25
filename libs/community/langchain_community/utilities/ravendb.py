@@ -57,22 +57,21 @@ class RavenDB:
         return {"schema": self.schema}
 
 # Example usage
-ravendb = RavenDB(
-    url="https://your-ravendb-url",
-    database_name="your-database-name",
-    cert_path="/path/to/your/certificate",  # Add the path to your certificate here
-    api_key="YOUR_API_KEY"
-)
-results = ravendb.execute("from Orders where Amount > 100")
-print(results)
+# ravendb = RavenDB(
+#     url="https://your-ravendb-url",
+#     database_name="your-database-name",
+#     cert_path="/path/to/your/certificate"
+# )
+# results = ravendb.execute("from Orders where Amount > 100")
+# print(results)
 
-# Using LangGraph
-def execute_ravendb_query(agent, query_text):
-    results = agent.execute(query_text)
-    return results
+# # Using LangGraph
+# def execute_ravendb_query(agent, query_text):
+#     results = agent.execute(query_text)
+#     return results
 
-# Example usage with LangGraph
-# Assuming you have a LangGraph instance
-query_text = "from Orders where Amount > 100"
-results = execute_ravendb_query(raven_tool, query_text)
-print(results)
+# # Example usage with LangGraph
+# # Assuming you have a LangGraph instance
+# query_text = "from Orders where Amount > 100"
+# results = execute_ravendb_query(raven_tool, query_text)
+# print(results)
