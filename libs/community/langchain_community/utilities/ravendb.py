@@ -2,9 +2,10 @@
 
 from typing import Any, Dict, List, Optional, Union
 
-from ravendb.documents.store import DocumentStore
-from ravendb.documents.session import DocumentSession
-from ravendb.exceptions import RavenDBError
+from ravendb.documents.store.definition import DocumentStore
+from ravendb.documents.session.document_session import DocumentSession
+from ravendb.exceptions.raven_exceptions import RavenException
+from ravendb.documents.operations.statistics import GetCollectionStatisticsOperation
 
 class RavenDB:
     """RavenDB wrapper around a database."""
@@ -13,22 +14,20 @@ class RavenDB:
         self,
         url: str,
         database_name: str,
-        cert_path: Optional[str] = None,
-        api_key: Optional[str] = None,
+        cert_path: Optional[str] = None
     ):
         """Initialize the RavenDBTool with connection details."""
-        self.store = DocumentStore(urls=[url], database=database_name, certificate=cert_path)
+        self.store = DocumentStore(urls=[url], database=database_name)
         self.store.initialize()
         self.schema = self.get_schema()
-        self.api_key = api_key
 
     def get_schema(self) -> Dict[str, Any]:
         """Retrieve the database schema."""
         schema = {}
-        with self.store.open_session() as session:
-            collections = session.advanced.raw_query("raven://documents?startswith=;").to_list()
-            for collection in collections:
-                schema[collection] = session.advanced.raw_query(f"raven://collections/{collection}/?start=0&pageSize=1").to_list()
+        with self.store as store:
+            collections = store.maintenance.send(GetCollectionStatisticsOperation())
+            collections = [collection['Name'] for collection in collections]
+            schema = collections
         return schema
 
     def execute_query(self, query_text: str) -> List[Dict[str, Any]]:
@@ -49,7 +48,7 @@ class RavenDB:
             if not include_columns:
                 results = [tuple(row.values()) for row in results]
             return results
-        except RavenDBError as e:
+        except RavenException as e:
             return f"Error: {e}"
 
     def get_context(self) -> Dict[str, Any]:

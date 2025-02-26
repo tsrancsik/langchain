@@ -184,3 +184,5 @@ docs/docs/templates
 prof
 virtualenv/
 test_ravendb_chain.py
+setup.py
+requirements.txt
