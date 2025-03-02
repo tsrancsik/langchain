@@ -186,3 +186,4 @@ virtualenv/
 test_ravendb_chain.py
 setup.py
 requirements.txt
+admin.client.certificate.langchain.pem

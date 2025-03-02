@@ -17,17 +17,31 @@ class RavenDB:
         cert_path: Optional[str] = None
     ):
         """Initialize the RavenDBTool with connection details."""
+        # FIXME: This violates the singleton pattern recommended by RavenDB -> function to initialize the store
         self.store = DocumentStore(urls=[url], database=database_name)
+        self.store.certificate_pem_path = cert_path
         self.store.initialize()
         self.schema = self.get_schema()
+
+    def to_dict(self, obj):
+        if isinstance(obj, dict):
+            return {k: self.to_dict(v) for k, v in obj.items()}
+        elif hasattr(obj, "__dict__"):
+            return {k: self.to_dict(v) for k, v in obj.__dict__.items()}
+        else:
+            return obj
 
     def get_schema(self) -> Dict[str, Any]:
         """Retrieve the database schema."""
         schema = {}
         with self.store as store:
-            collections = store.maintenance.send(GetCollectionStatisticsOperation())
-            collections = [collection['Name'] for collection in collections]
-            schema = collections
+            collection_stats = store.maintenance.send(GetCollectionStatisticsOperation()).collections
+            with store.open_session() as session:
+                for key in collection_stats.keys():
+                    # Query the first document in the collection
+                    first_document = session.query_collection(key).first()
+                    schema[key] = self.to_dict(first_document)
+        print(schema)
         return schema
 
     def execute_query(self, query_text: str) -> List[Dict[str, Any]]:
