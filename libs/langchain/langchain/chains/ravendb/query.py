@@ -27,7 +27,7 @@ class RQLInputWithCollections(TypedDict):
     """Input for a RavenDB Chain."""
 
     question: str
-    table_names_to_use: List[str]
+    collection_names_to_use: List[str]
 
 
 def create_rql_query_chain(
@@ -88,9 +88,9 @@ def create_rql_query_chain(
             * input: The user question plus suffix "\nRQLQuery: " is passed here.
             * top_k: The number of results per select statement (the `k` argument to
                 this function) is passed in here.
-            * collection_info: Table definitions and sample rows are passed in here. If the
-                user specifies "table_names_to_use" when invoking chain, only those
-                will be included. Otherwise, all tables are included.
+            * collection_info: Collection definitions and sample rows are passed in here. If the
+                user specifies "collection_names_to_use" when invoking chain, only those
+                will be included. Otherwise, all collections are included.
         Here's an example prompt:
 
         .. code-block:: python
@@ -105,7 +105,7 @@ def create_rql_query_chain(
             RQLResult: "Result of the RQLQuery"
             Answer: "Final answer here"
 
-            Only use the following tables:
+            Only use the following collections:
 
             {collection_info}.
 
@@ -131,7 +131,7 @@ def create_rql_query_chain(
     inputs = {
         "input": lambda x: x["question"] + "\nRQLQuery: ",
         "collection_info": lambda x: db.get_collection_info(
-            table_names=x.get("table_names_to_use")
+            collection_names=x.get("collection_names_to_use")
         ),
     }
     return (
@@ -140,7 +140,7 @@ def create_rql_query_chain(
             lambda x: {
                 k: v
                 for k, v in x.items()
-                if k not in ("question", "table_names_to_use")
+                if k not in ("question", "collection_names_to_use")
             }
         )
         | prompt_to_use.partial(top_k=str(k))

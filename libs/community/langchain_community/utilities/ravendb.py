@@ -7,21 +7,36 @@ from ravendb.documents.session.document_session import DocumentSession
 from ravendb.exceptions.raven_exceptions import RavenException
 from ravendb.documents.operations.statistics import GetCollectionStatisticsOperation
 
+class DocumentStoreHolder:
+    """Singleton holder for the DocumentStore instance."""
+    _instance: Optional[DocumentStore] = None
+    _url: Optional[str] = None
+    _database_name: Optional[str] = None
+    _cert_path: Optional[str] = None
+
+    @classmethod
+    def configure(cls, url: str, database_name: str, cert_path: Optional[str] = None):
+        cls._url = url
+        cls._database_name = database_name
+        cls._cert_path = cert_path
+
+    @classmethod
+    def get_store(cls) -> DocumentStore:
+        if cls._instance is None:
+            if cls._url is None or cls._database_name is None:
+                raise ValueError("DocumentStoreHolder is not configured with URL and database name.")
+            cls._instance = DocumentStore(urls=[cls._url], database=cls._database_name)
+            cls._instance.certificate_pem_path = cls._cert_path
+            cls._instance.initialize()
+        return cls._instance
+
 class RavenDB:
     """RavenDB wrapper around a database."""
 
-    def __init__(
-        self,
-        url: str,
-        database_name: str,
-        cert_path: Optional[str] = None
-    ):
+    def __init__(self):
         """Initialize the RavenDBTool with connection details."""
-        # FIXME: This violates the singleton pattern recommended by RavenDB -> function to initialize the store
-        self.store = DocumentStore(urls=[url], database=database_name)
-        self.store.certificate_pem_path = cert_path
-        self.store.initialize()
-        self.schema = self.get_schema()
+        self.store = DocumentStoreHolder.get_store()
+        # self.schema = self.get_collection_info([])  # Pass an empty list as the default value``
 
     def to_dict(self, obj):
         if isinstance(obj, dict):
@@ -31,16 +46,17 @@ class RavenDB:
         else:
             return obj
 
-    def get_schema(self) -> Dict[str, Any]:
-        """Retrieve the database schema."""
+    def get_collection_info(self, collection_names: List[str]) -> Dict[str, Any]:
+        """Retrieve collections and sample documents."""
         schema = {}
         with self.store as store:
             collection_stats = store.maintenance.send(GetCollectionStatisticsOperation()).collections
             with store.open_session() as session:
                 for key in collection_stats.keys():
-                    # Query the first document in the collection
-                    first_document = session.query_collection(key).first()
-                    schema[key] = self.to_dict(first_document)
+                    if not collection_names or key in collection_names:
+                        # Query the first document in the collection
+                        first_document = session.query_collection(key).first()
+                        schema[key] = self.to_dict(first_document)
         print(schema)
         return schema
 
@@ -75,16 +91,16 @@ class RavenDB:
 #     database_name="your-database-name",
 #     cert_path="/path/to/your/certificate"
 # )
-# results = ravendb.execute("from Orders where Amount > 100")
+# results = ravendb.execute("from @collection_names")
 # print(results)
 
-# # Using LangGraph
+# Using LangGraph
 # def execute_ravendb_query(agent, query_text):
 #     results = agent.execute(query_text)
 #     return results
 
-# # Example usage with LangGraph
-# # Assuming you have a LangGraph instance
+# Example usage with LangGraph
+# Assuming you have a LangGraph instance
 # query_text = "from Orders where Amount > 100"
-# results = execute_ravendb_query(raven_tool, query_text)
+# results = ravendb.execute(query_text)
 # print(results)
