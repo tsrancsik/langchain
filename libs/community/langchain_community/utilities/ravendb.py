@@ -10,22 +10,22 @@ from ravendb.documents.operations.statistics import GetCollectionStatisticsOpera
 class DocumentStoreHolder:
     """Singleton holder for the DocumentStore instance."""
     _instance: Optional[DocumentStore] = None
-    _url: Optional[str] = None
+    _urls: Optional[List[str]] = None
     _database_name: Optional[str] = None
     _cert_path: Optional[str] = None
 
     @classmethod
-    def configure(cls, url: str, database_name: str, cert_path: Optional[str] = None):
-        cls._url = url
+    def configure(cls, urls: List[str], database_name: str, cert_path: Optional[str] = None):
+        cls._urls = urls
         cls._database_name = database_name
         cls._cert_path = cert_path
 
     @classmethod
     def get_store(cls) -> DocumentStore:
         if cls._instance is None:
-            if cls._url is None or cls._database_name is None:
+            if cls._urls is None or cls._database_name is None:
                 raise ValueError("DocumentStoreHolder is not configured with URL and database name.")
-            cls._instance = DocumentStore(urls=[cls._url], database=cls._database_name)
+            cls._instance = DocumentStore(urls=cls._urls, database=cls._database_name)
             cls._instance.certificate_pem_path = cls._cert_path
             cls._instance.initialize()
         return cls._instance
@@ -70,20 +70,14 @@ class RavenDB:
         self,
         query_text: str,
         fetch: str = "all",
-        include_columns: bool = False,
     ) -> Union[str, List[Dict[str, Any]]]:
         """Execute a query and return the results."""
         try:
+            print(query_text)
             results = self.execute_query(query_text)
-            if not include_columns:
-                results = [tuple(row.values()) for row in results]
             return results
         except RavenException as e:
             return f"Error: {e}"
-
-    def get_context(self) -> Dict[str, Any]:
-        """Return db context that you may want in agent prompt."""
-        return {"schema": self.schema}
 
 # Example usage
 # ravendb = RavenDB(

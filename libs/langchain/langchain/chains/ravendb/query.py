@@ -56,8 +56,8 @@ def create_rql_query_chain(
     Args:
         llm: The language model to use.
         db: The RavenDB to generate the query for.
-        prompt: The prompt to use. If none is provided, will choose one
-            based on dialect. Defaults to None. See Prompt section below for more.
+        prompt: The prompt to use. If none is provided, will choose one.
+            Defaults to None. See Prompt section below for more.
         k: The number of results per select statement to return. Defaults to 5.
 
     Returns:
@@ -74,9 +74,9 @@ def create_rql_query_chain(
             from langchain_community.utilities import RavenDB
 
             ravendb = RavenDB(
-                url="https://your-ravendb-url",
+                urls=["https://your-ravendb-url"],
                 database_name="your-database-name",
-                cert_path="/path/to/your/certificate",  # Add the path to your certificate here
+                cert_path="/path/to/your/certificate",
                 api_key="YOUR_API_KEY"
             )
             llm = ChatOpenAI(model="gpt-4o", temperature=0)
@@ -84,7 +84,7 @@ def create_rql_query_chain(
             response = chain.invoke({"question": "How many employees are there"})
 
     Prompt:
-        If no prompt is provided, a default prompt is selected based on the RavenDB dialect. If one is provided, it must support input variables:
+        If no prompt is provided, a default prompt is selected based. If one is provided, it must support input variables:
             * input: The user question plus suffix "\nRQLQuery: " is passed here.
             * top_k: The number of results per select statement (the `k` argument to
                 this function) is passed in here.
@@ -125,8 +125,6 @@ def create_rql_query_chain(
             f"'collection_info'. Received prompt with input variables: "
             f"{prompt_to_use.input_variables}. Full prompt:\n\n{prompt_to_use}"
         )
-    if "dialect" in prompt_to_use.input_variables:
-        prompt_to_use = prompt_to_use.partial(dialect=db.dialect)
 
     inputs = {
         "input": lambda x: x["question"] + "\nRQLQuery: ",

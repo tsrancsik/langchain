@@ -10,6 +10,13 @@ Question: {input}"""
 
 _DEFAULT_TEMPLATE = """Given an input question, first create a syntactically correct RavenDB RQL query to run, then look at the results of the query and return the answer. Unless the user specifies in his question a specific number of examples he wishes to obtain, always limit your query to at most {top_k} results. You can order the results by a relevant column to return the most interesting examples in the database.
 
+An example of the correct format is as follows:
+from Orders
+group by Employee
+order by count() desc
+select Employee, count() as OrderCount
+limit 5
+
 Never query for all the attributes of the documents from a specific collection, only ask for a the few relevant attributes given the question.
 
 Pay attention to use only the attribute names that you can see in the schema description. Be careful to not query for attributes that do not exist. Also, pay attention to which column is in which table.

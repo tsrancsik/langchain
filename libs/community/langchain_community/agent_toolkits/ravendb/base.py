@@ -28,7 +28,8 @@ from langchain_community.agent_toolkits.ravendb.prompt import (
     RQL_SUFFIX,
 )
 from langchain_community.agent_toolkits.ravendb.toolkit import RavenDBToolkit
-from langchain_community.tools.sql_database.tool import (
+
+from langchain_community.tools.ravendb.tool import (
     InfoRavenDBTool,
     ListRavenDBTool,
 )
@@ -43,7 +44,9 @@ if TYPE_CHECKING:
     from langchain_community.utilities.ravendb import RavenDB
 
 
-def create_sql_agent(
+
+# TODO: Review tooling
+def create_ravendb_agent(
     llm: BaseLanguageModel,
     toolkit: Optional[RavenDBToolkit] = None,
     agent_type: Optional[
@@ -65,13 +68,14 @@ def create_sql_agent(
     db: Optional[RavenDB] = None,
     prompt: Optional[BasePromptTemplate] = None,
     **kwargs: Any,
+    # TODO: Review the followings
 ) -> AgentExecutor:
-    """Construct a SQL agent from an LLM and toolkit or database.
+    """Construct a RavenDB agent from an LLM and toolkit or database.
 
     Args:
         llm: Language model to use for the agent. If agent_type is "tool-calling" then
             llm is expected to support tool calling.
-        toolkit: SQLDatabaseToolkit for the agent to use. Must provide exactly one of
+        toolkit: RavenDBToolkit for the agent to use. Must provide exactly one of
             'toolkit' or 'db'. Specify 'toolkit' if you want to use a different model
             for the agent and the toolkit.
         agent_type: One of "tool-calling", "openai-tools", "openai-functions", or
@@ -108,7 +112,7 @@ def create_sql_agent(
         .. code-block:: python
 
             from langchain_openai import ChatOpenAI
-            from langchain_community.agent_toolkits import create_sql_agent
+            from langchain_community.agent_toolkits import create_ravendb_agent
             from langchain_community.utilities import RavenDB
 
             db = RavenDB(
