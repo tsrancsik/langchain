@@ -46,24 +46,23 @@ class RavenDB:
         else:
             return obj
 
-    def get_collection_info(self, collection_names: List[str]) -> Dict[str, Any]:
+    def get_collection_info(self, collection_names: Optional[List[str]] = None) -> Dict[str, Any]:
         """Retrieve collections and sample documents."""
         schema = {}
-        with self.store as store:
-            collection_stats = store.maintenance.send(GetCollectionStatisticsOperation()).collections
-            with store.open_session() as session:
-                for key in collection_stats.keys():
-                    if not collection_names or key in collection_names:
-                        # Query the first document in the collection
-                        first_document = session.query_collection(key).first()
-                        schema[key] = self.to_dict(first_document)
-        print(schema)
+        collection_stats = self.store.maintenance.send(GetCollectionStatisticsOperation()).collections
+        with self.store.open_session() as session:
+            for key in collection_stats.keys():
+                if not collection_names or key in collection_names:
+                    # Query the first document in the collection
+                    first_document = session.query_collection(key).first()
+                    schema[key] = self.to_dict(first_document)
+        # print(schema)
         return schema
 
     def execute_query(self, query_text: str) -> List[Dict[str, Any]]:
         """Execute a RavenDB query and return the results."""
         with self.store.open_session() as session:
-            results = session.advanced.raw_query(query_text).to_list()
+            results = session.advanced.raw_query(query_text).get_query_result().results
         return results
 
     def execute(

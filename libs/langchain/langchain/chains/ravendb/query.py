@@ -41,7 +41,7 @@ def create_rql_query_chain(
     *Security Note*: This chain generates RavenDB RQL queries for the given database.
 
         The RavenDB class provides a get_collection_info method that can be used
-        to get column information as well as sample data from the table.
+        to get field information as well as sample data from the table.
 
         To mitigate risk of leaking sensitive data, limit permissions
         to read and scope to the tables that are needed.

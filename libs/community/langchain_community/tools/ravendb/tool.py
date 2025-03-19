@@ -34,7 +34,7 @@ class _QueryRavenDBToolInput(BaseModel):
 class QueryRavenDBTool(BaseRavenDBTool, BaseTool):
     name: str = "ravendb_query"
     description: str = """
-    Execute an RQL query against the RavenDB database and get back the result..
+    Execute an RQL query against the RavenDB database and get back the result.
     If the query is not correct, an error message will be returned.
     If an error is returned, rewrite the query, check the query, and try again.
     """
@@ -46,7 +46,7 @@ class QueryRavenDBTool(BaseRavenDBTool, BaseTool):
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> str:
         """Execute the query, return the results or an error message."""
-        return self.db.run_no_throw(query)
+        return self.db.execute(query)
 
 
 class _InfoRavenDBToolInput(BaseModel):
@@ -98,10 +98,10 @@ class ListRavenDBTool(BaseRavenDBTool, BaseTool):  # type: ignore[override, over
 
 
 class _QueryRQLCheckerToolInput(BaseModel):
-    query: str = Field(..., description="A detailed and RQL query to be checked.")
+    query: str = Field(..., description="RQL query to be checked.")
 
 
-class QueryRQLCheckerTool(BaseRQLDatabaseTool, BaseTool):  # type: ignore[override, override]
+class QueryRQLCheckerTool(BaseRavenDBTool, BaseTool):  # type: ignore[override, override]
     """Use an LLM to check if a query is correct.
     Adapted from https://www.patterns.app/blog/2023/01/18/crunchbot-sql-analyst-gpt/"""
 
